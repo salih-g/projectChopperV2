@@ -38,9 +38,7 @@ public class chopperBrain : MonoBehaviour
 
 
 
-        if (horizontal == 0)
-            velocity.x=0;
-       else if (horizontal!=0)
+        if (horizontal!=0)
             velocity += (horizontal * horizontalThrust * Time.deltaTime) * horizontalSpeed;
 
 

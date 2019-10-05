@@ -11,7 +11,8 @@ public class gameManager : MonoBehaviour
 
     private GameObject _player;
     private GameObject _playerTurret;
-
+    [Header("AntiAir")]
+   public int[] aaLevelDifficulty = new int[10];
 
     void Awake()
     {

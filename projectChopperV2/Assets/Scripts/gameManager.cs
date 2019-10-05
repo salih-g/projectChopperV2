@@ -5,27 +5,31 @@ using UnityEngine;
 public class gameManager : MonoBehaviour
 {
 
-    public static gameManager instance;
+    private static gameManager instance;
 
+    [Header("GameObjects")]
 
     private GameObject _player;
     private GameObject _playerTurret;
 
-    [Header("AntiAirLevelDifficulty")]
-    public int[] aaLevelDifficulty = new int[10];
+
     void Awake()
     {
         if (instance == null)
         {
             instance = this;
         }
-    }
 
-    private void Start()
-    {
+
         _player = GameObject.FindGameObjectWithTag("Player");
         _playerTurret = GameObject.FindGameObjectWithTag("PlayerTurret");
+
+        if (_player == null)
+            Debug.Log("_player Boş!!!");
+        if (_playerTurret == null)
+            Debug.Log("_playerTurret Boş!!!");
     }
+
 
     public static gameManager Instance
     {

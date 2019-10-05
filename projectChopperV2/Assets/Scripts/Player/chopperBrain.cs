@@ -17,12 +17,29 @@ public class chopperBrain : MonoBehaviour
     public Vector3 thrust;
     public Vector3 horizontalThrust;
     private Vector3 clampPosition;
-
+    private Vector3 mouseMove;
 
     Vector3 velocity = Vector3.zero;
 
+    [Header("GameObjects")]
+    private GameObject turret;
+    private GameObject crossHair;
 
- 
+    [Header("Cams")]
+    private Camera mainCam;
+
+
+    private void Start()
+    {
+        turret = gameObject.transform.GetChild(0).gameObject;
+        mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+        crossHair = gameObject.transform.GetChild(1).gameObject;
+    }
+
+    private void Update()
+    {
+        MouseTracking();
+    }
     private void FixedUpdate()
     {
         chopperPhysics();
@@ -38,9 +55,7 @@ public class chopperBrain : MonoBehaviour
 
 
 
-        if (horizontal == 0)
-            velocity.x=0;
-       else if (horizontal!=0)
+        if (horizontal!=0)
             velocity += (horizontal * horizontalThrust * Time.deltaTime) * horizontalSpeed;
 
 
@@ -62,5 +77,23 @@ public class chopperBrain : MonoBehaviour
         transform.position = clampPosition;
 
         transform.position += velocity * Time.deltaTime;
+    }
+
+    private void MouseTracking()
+    {
+        mouseMove = mainCam.ScreenToWorldPoint(Input.mousePosition);
+        mouseMove.Set(mouseMove.x, mouseMove.y, transform.position.z);
+
+        float angleRad = Mathf.Atan2(
+           mouseMove.y - turret.transform.position.y,
+           mouseMove.x - turret.transform.position.x
+           );
+
+        float angleDeg = (180 / Mathf.PI) * angleRad;
+
+        turret.transform.rotation = Quaternion.Euler(0, 0, Mathf.Clamp(angleDeg, -80.0F, 41.15F));
+
+        crossHair.transform.position = mouseMove;
+
     }
 }

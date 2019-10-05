@@ -21,10 +21,8 @@ public class gameManager : MonoBehaviour
         {
             instance = this;
         }
-    }
 
-    private void Start()
-    {
+
         _player = GameObject.FindGameObjectWithTag("Player");
         _playerTurret = GameObject.FindGameObjectWithTag("PlayerTurret");
 
@@ -33,6 +31,7 @@ public class gameManager : MonoBehaviour
         if (_playerTurret == null)
             Debug.Log("_playerTurret Boş!!!");
     }
+
 
     public static gameManager Instance
     {

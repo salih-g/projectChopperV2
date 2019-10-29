@@ -10,6 +10,8 @@ public class chopperBrain : MonoBehaviour
     public float horizontalSpeed;
     public float clampXmin, clampXmax;
     public float clampYmin, clampYmax;
+    public float bulletSpeed = 50f;
+    public float forwardRotation, backwardRotation,rotationSpeed;
 
 
     [Header("Vectors")]
@@ -18,6 +20,8 @@ public class chopperBrain : MonoBehaviour
     public Vector3 horizontalThrust;
     private Vector3 clampPosition;
     private Vector3 mouseMove;
+    Vector3 chopperRotation;
+
 
     Vector3 velocity = Vector3.zero;
 
@@ -25,8 +29,12 @@ public class chopperBrain : MonoBehaviour
     private GameObject turret;
     private GameObject crossHair;
 
+
     [Header("Cams")]
     private Camera mainCam;
+
+    [Header("Others")]
+    public chopperBulletPool chopperBulletPool;
 
 
     private void Start()
@@ -39,24 +47,66 @@ public class chopperBrain : MonoBehaviour
     private void Update()
     {
         MouseTracking();
+        if (Input.GetMouseButtonDown(0))
+        {
+            Fire(chopperBulletPool.GetNextAvailableObject());
+        }
     }
     private void FixedUpdate()
     {
         chopperPhysics();
     }
-    
+
 
 
     private void chopperPhysics()
     {
+        Debug.Log(chopperRotation.z);
+
         horizontal = Input.GetAxisRaw("Horizontal");
 
         velocity += gravitiy * Time.deltaTime;
 
 
+        if (horizontal != 0)
+            velocity += (horizontal * horizontalThrust * Time.fixedDeltaTime) * horizontalSpeed;
 
-        if (horizontal!=0)
-            velocity += (horizontal * horizontalThrust * Time.deltaTime) * horizontalSpeed;
+        if (horizontal > 0)
+        {
+
+            if (chopperRotation.z > forwardRotation)
+                chopperRotation.z -= Time.deltaTime* rotationSpeed;
+
+
+        }
+        else if (horizontal < 0)
+        {
+            if (chopperRotation.z < backwardRotation)
+                chopperRotation.z += Time.deltaTime * rotationSpeed;
+
+
+        }
+        else
+        {
+            if (chopperRotation.z < 0)
+            {
+                if (chopperRotation.z != 0)
+                {
+                    chopperRotation.z += Time.deltaTime * rotationSpeed;
+                }
+            }
+            if (chopperRotation.z > 0)
+            {
+                if (chopperRotation.z != 0)
+                {
+                    chopperRotation.z -= Time.deltaTime * rotationSpeed;
+                }
+            }
+        }
+            
+
+        transform.rotation = Quaternion.Euler(chopperRotation);
+
 
 
         if (Input.GetKey(KeyCode.W))
@@ -65,18 +115,26 @@ public class chopperBrain : MonoBehaviour
         }
 
 
-        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
 
         clampPosition = transform.position;
 
 
-        clampPosition.x = Mathf.Clamp(clampPosition.x, clampXmin,clampXmax);
-        clampPosition.y = Mathf.Clamp(clampPosition.y, clampYmin,clampYmax);
+        clampPosition.x = Mathf.Clamp(clampPosition.x, clampXmin, clampXmax);
+        clampPosition.y = Mathf.Clamp(clampPosition.y, clampYmin, clampYmax);
 
 
         transform.position = clampPosition;
 
+        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
         transform.position += velocity * Time.deltaTime;
+
+        if (velocity.x != 0 && horizontal == 0)
+        {
+            if (velocity.x > 0)
+                velocity -= ((horizontalThrust / 5) * Time.fixedDeltaTime) * horizontalSpeed;
+            if (velocity.x < 0)
+                velocity += ((horizontalThrust / 5) * Time.fixedDeltaTime) * horizontalSpeed;
+        }
     }
 
     private void MouseTracking()
@@ -95,5 +153,12 @@ public class chopperBrain : MonoBehaviour
 
         crossHair.transform.position = mouseMove;
 
+    }
+
+    private void Fire(GameObject bullet)
+    {
+        bullet.transform.position = turret.transform.position;
+        bullet.transform.rotation = turret.transform.rotation;
+        bullet.GetComponent<Rigidbody2D>().AddForce((crossHair.transform.position - turret.transform.position).normalized * bulletSpeed * 1000);
     }
 }
